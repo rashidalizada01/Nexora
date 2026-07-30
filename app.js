@@ -960,7 +960,14 @@
   }
 
   function setupCoverflow(
-    { containerSelector, prevSelector, nextSelector, depth = 220 },
+    {
+      containerSelector,
+      prevSelector,
+      nextSelector,
+      depth = 220,
+      centerFromLayout = false,
+      autoplayMs = 0,
+    },
     signal,
   ) {
     const container = $(containerSelector);
@@ -975,20 +982,42 @@
       ),
     );
     const render = (animate = true) => {
+      if (centerFromLayout) {
+        slides.forEach((slide, index) => {
+          const distance = index - active;
+          slide.classList.toggle("swiper-slide-active", distance === 0);
+          slide.classList.toggle("swiper-slide-prev", distance === -1);
+          slide.classList.toggle("swiper-slide-next", distance === 1);
+          slide.classList.toggle(
+            "swiper-slide-visible",
+            Math.abs(distance) <= 2,
+          );
+        });
+      }
       const containerWidth = container.clientWidth || window.innerWidth;
-      const slideWidth = slides[active]?.getBoundingClientRect().width || 315;
+      const activeSlide = slides[active];
+      const slideWidth = activeSlide?.getBoundingClientRect().width || 315;
       const margin =
-        parseFloat(getComputedStyle(slides[active]).marginRight) || 0;
-      const offset =
-        containerWidth / 2 - slideWidth / 2 - active * (slideWidth + margin);
+        parseFloat(getComputedStyle(activeSlide).marginRight) || 0;
+      const offset = centerFromLayout
+        ? containerWidth / 2 -
+          ((activeSlide?.offsetLeft || 0) + (activeSlide?.offsetWidth || slideWidth) / 2)
+        : containerWidth / 2 -
+          slideWidth / 2 -
+          active * (slideWidth + margin);
       wrapper.style.transition = animate ? "transform 480ms ease" : "none";
       wrapper.style.transform = `translate3d(${offset}px, 0, 0)`;
       slides.forEach((slide, index) => {
         const distance = index - active;
-        slide.classList.toggle("swiper-slide-active", distance === 0);
-        slide.classList.toggle("swiper-slide-prev", distance === -1);
-        slide.classList.toggle("swiper-slide-next", distance === 1);
-        slide.classList.toggle("swiper-slide-visible", Math.abs(distance) <= 2);
+        if (!centerFromLayout) {
+          slide.classList.toggle("swiper-slide-active", distance === 0);
+          slide.classList.toggle("swiper-slide-prev", distance === -1);
+          slide.classList.toggle("swiper-slide-next", distance === 1);
+          slide.classList.toggle(
+            "swiper-slide-visible",
+            Math.abs(distance) <= 2,
+          );
+        }
         slide.style.transition = animate
           ? "transform 480ms ease, opacity 480ms ease"
           : "none";
@@ -1002,8 +1031,24 @@
       active = (active + delta + slides.length) % slides.length;
       render(true);
     };
-    $(prevSelector)?.addEventListener("click", () => move(-1), { signal });
-    $(nextSelector)?.addEventListener("click", () => move(1), { signal });
+    let autoplayTimer = null;
+    const restartAutoplay = () => {
+      if (autoplayTimer !== null) window.clearInterval(autoplayTimer);
+      autoplayTimer =
+        autoplayMs > 0 && slides.length > 1
+          ? window.setInterval(() => move(1), autoplayMs)
+          : null;
+    };
+    const manualMove = (delta) => {
+      move(delta);
+      restartAutoplay();
+    };
+    $(prevSelector)?.addEventListener("click", () => manualMove(-1), {
+      signal,
+    });
+    $(nextSelector)?.addEventListener("click", () => manualMove(1), {
+      signal,
+    });
     let startX = null;
     container.addEventListener(
       "pointerdown",
@@ -1018,16 +1063,25 @@
       (event) => {
         if (startX === null) return;
         const delta = event.clientX - startX;
-        if (Math.abs(delta) > 45) move(delta > 0 ? -1 : 1);
+        if (Math.abs(delta) > 45) manualMove(delta > 0 ? -1 : 1);
         startX = null;
       },
       { signal },
     );
     window.addEventListener("resize", () => render(false), { signal });
+    signal?.addEventListener(
+      "abort",
+      () => {
+        if (autoplayTimer !== null) window.clearInterval(autoplayTimer);
+      },
+      { once: true },
+    );
     requestAnimationFrame(() => render(false));
+    restartAutoplay();
   }
 
   function initSliders(signal) {
+    const SCHOLARSHIPS_SLIDER_AUTOPLAY_MS = 4500;
     setupCoverflow(
       {
         containerSelector: ".SuccessStories_ai-success--stories__vv5bs .swiper",
@@ -1045,48 +1099,68 @@
         prevSelector: ".ViewsFromNaic_section__header__controller__prev__cyPxK",
         nextSelector: ".ViewsFromNaic_section__header__controller__next__wERDV",
         depth: 125,
+        centerFromLayout: true,
+        autoplayMs: SCHOLARSHIPS_SLIDER_AUTOPLAY_MS,
       },
       signal,
     );
   }
 
   function initPagination(signal) {
-    const buttons = $$(".Pagination_ai-pagination__item___y0si");
-    if (!buttons.length) return;
-    const pageButtons = buttons.filter((button) =>
-      /^\d+$/.test(button.textContent.trim()),
-    );
-    const prev = buttons.find((button) => {
-      const label = button.getAttribute("aria-label") || "";
-      return label.includes("Əvvəlki") || label.includes("Previous");
-    });
-    const next = buttons.find((button) => {
-      const label = button.getAttribute("aria-label") || "";
-      return label.includes("Növbəti") || label.includes("Next");
-    });
-    let active = Math.max(
-      0,
-      pageButtons.findIndex((b) =>
-        b.classList.contains("Pagination_active__qQWfE"),
-      ),
-    );
+    const FAQ_PAGE_SIZE = 6;
     const activeClass = "Pagination_active__qQWfE";
-    const setPage = (index) => {
-      active = clamp(index, 0, pageButtons.length - 1);
-      pageButtons.forEach((button, i) => {
-        button.classList.toggle(activeClass, i === active);
-        if (i === active) button.setAttribute("aria-current", "page");
-        else button.removeAttribute("aria-current");
+    $$(".Pagination_ai-pagination__mtI7X").forEach((pagination) => {
+      const buttons = $$(".Pagination_ai-pagination__item___y0si", pagination);
+      const pageButtons = buttons.filter((button) =>
+        /^\d+$/.test(button.textContent.trim()),
+      );
+      const section = pagination.closest(".section");
+      const cards = section
+        ? $$(".BlogCard_ai-blogs__item__4ILGi", section)
+        : [];
+      if (!pageButtons.length || !cards.length) return;
+      const totalPages = Math.min(
+        pageButtons.length,
+        Math.ceil(cards.length / FAQ_PAGE_SIZE),
+      );
+      const prev = buttons.find((button) => {
+        const label = button.getAttribute("aria-label") || "";
+        return label.includes("Əvvəlki") || label.includes("Previous");
       });
-      const section =
-        pageButtons[0]?.closest("section") || pageButtons[0]?.parentElement;
-      section?.scrollIntoView({ behavior: "smooth", block: "start" });
-    };
-    pageButtons.forEach((button, i) =>
-      button.addEventListener("click", () => setPage(i), { signal }),
-    );
-    prev?.addEventListener("click", () => setPage(active - 1), { signal });
-    next?.addEventListener("click", () => setPage(active + 1), { signal });
+      const next = buttons.find((button) => {
+        const label = button.getAttribute("aria-label") || "";
+        return label.includes("Növbəti") || label.includes("Next");
+      });
+      let active = clamp(
+        pageButtons.findIndex((button) => button.classList.contains(activeClass)),
+        0,
+        totalPages - 1,
+      );
+      const setPage = (index, shouldScroll = true) => {
+        active = clamp(index, 0, totalPages - 1);
+        pageButtons.forEach((button, i) => {
+          button.classList.toggle(activeClass, i === active);
+          if (i === active) button.setAttribute("aria-current", "page");
+          else button.removeAttribute("aria-current");
+        });
+        cards.forEach((card, i) => {
+          card.hidden =
+            i < active * FAQ_PAGE_SIZE ||
+            i >= (active + 1) * FAQ_PAGE_SIZE;
+        });
+        if (prev) prev.disabled = active === 0;
+        if (next) next.disabled = active === totalPages - 1;
+        if (shouldScroll) {
+          section.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      };
+      pageButtons.forEach((button, i) =>
+        button.addEventListener("click", () => setPage(i), { signal }),
+      );
+      prev?.addEventListener("click", () => setPage(active - 1), { signal });
+      next?.addEventListener("click", () => setPage(active + 1), { signal });
+      setPage(active, false);
+    });
   }
 
   function initPhoneInputs(signal) {
