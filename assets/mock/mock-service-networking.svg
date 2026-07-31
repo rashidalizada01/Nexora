@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" role="img" aria-labelledby="title desc">
+  <title id="title">Şəbəkə laboratoriyası xidməti</title><desc id="desc">Router və dörd şəbəkə qovşağından ibarət ikon</desc>
+  <defs><linearGradient id="g" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#3554d1"/><stop offset="1" stop-color="#9ed8ff"/></linearGradient></defs>
+  <rect width="640" height="640" rx="96" fill="#141414"/><circle cx="320" cy="320" r="240" fill="#1f1f1f" stroke="#262626" stroke-width="8"/>
+  <g stroke="#5ba7ff" stroke-width="9"><path d="M160 165 260 270M480 165 380 270M160 475 260 370M480 475 380 370"/></g>
+  <g fill="url(#g)"><circle cx="150" cy="150" r="42"/><circle cx="490" cy="150" r="42"/><circle cx="150" cy="490" r="42"/><circle cx="490" cy="490" r="42"/></g>
+  <rect x="220" y="245" width="200" height="150" rx="30" fill="url(#g)"/><rect x="260" y="285" width="120" height="20" rx="10" fill="#141414"/><circle cx="270" cy="350" r="11" fill="#141414"/><circle cx="305" cy="350" r="11" fill="#141414"/>
+</svg>

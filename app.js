@@ -5,6 +5,84 @@
   const $$ = (selector, root = document) =>
     Array.from(root.querySelectorAll(selector));
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+  const MOCK_IMAGE_FALLBACKS = Object.freeze({
+    "hero-networking": {
+      src: "assets/mock/mock-hero-networking.svg",
+      alt: "Şəbəkə infrastrukturu üzrə nümunəvi hero vizualı",
+    },
+    "course-networking": {
+      src: "assets/mock/mock-course-networking.svg",
+      alt: "Şəbəkə texnologiyaları kursu üçün nümunəvi vizual",
+    },
+    "course-cybersecurity": {
+      src: "assets/mock/mock-course-cybersecurity.svg",
+      alt: "Kibertəhlükəsizlik kursu üçün nümunəvi vizual",
+    },
+    "course-cloud-devops": {
+      src: "assets/mock/mock-course-cloud-devops.svg",
+      alt: "Cloud və DevOps kursu üçün nümunəvi vizual",
+    },
+    "instructor-1": {
+      src: "assets/mock/mock-instructor-networking-1.svg",
+      alt: "Şəbəkə texnologiyaları müəllimi üçün nümunəvi portret",
+    },
+    "instructor-2": {
+      src: "assets/mock/mock-instructor-networking-2.svg",
+      alt: "IT sertifikasiya müəllimi üçün nümunəvi portret",
+    },
+    "instructor-3": {
+      src: "assets/mock/mock-instructor-networking-3.svg",
+      alt: "Cloud texnologiyaları müəllimi üçün nümunəvi portret",
+    },
+    "blog-networking": {
+      src: "assets/mock/mock-blog-networking.svg",
+      alt: "Şəbəkə texnologiyaları bloqu üçün nümunəvi vizual",
+    },
+    "blog-cybersecurity": {
+      src: "assets/mock/mock-blog-cybersecurity.svg",
+      alt: "Kibertəhlükəsizlik bloqu üçün nümunəvi vizual",
+    },
+    "blog-cloud-devops": {
+      src: "assets/mock/mock-blog-cloud-devops.svg",
+      alt: "Cloud və DevOps bloqu üçün nümunəvi vizual",
+    },
+    "scholarship-certification": {
+      src: "assets/mock/mock-scholarship-certification.svg",
+      alt: "IT sertifikasiyası təqaüdü üçün nümunəvi vizual",
+    },
+    "service-networking": {
+      src: "assets/mock/mock-service-networking.svg",
+      alt: "Şəbəkə laboratoriyası xidməti üçün nümunəvi ikon",
+    },
+    "gallery-network-lab": {
+      src: "assets/mock/mock-gallery-network-lab.svg",
+      alt: "Şəbəkə laboratoriyası üçün nümunəvi qalereya vizualı",
+    },
+    "career-network-engineer": {
+      src: "assets/mock/mock-career-network-engineer.svg",
+      alt: "Şəbəkə mühəndisliyi karyerası üçün nümunəvi vizual",
+    },
+    "faq-networking-guide": {
+      src: "assets/mock/mock-faq-networking-guide.svg",
+      alt: "Şəbəkə sertifikasiyası bələdçisi üçün nümunəvi vizual",
+    },
+    "decoration-network-nodes": {
+      src: "assets/mock/mock-decoration-network-nodes.svg",
+      alt: "Şəbəkə qovşaqlarını göstərən dekorativ vizual",
+    },
+    "project-networking": {
+      src: "assets/mock/mock-project-networking.svg",
+      alt: "Şəbəkə avtomatlaşdırması layihəsi üçün nümunəvi vizual",
+    },
+    "project-cloud-devops": {
+      src: "assets/mock/mock-project-cloud-devops.svg",
+      alt: "Cloud platforması layihəsi üçün nümunəvi vizual",
+    },
+    "project-cybersecurity": {
+      src: "assets/mock/mock-project-cybersecurity.svg",
+      alt: "Kibertəhlükəsizlik layihəsi üçün nümunəvi vizual",
+    },
+  });
   const PAGES = readPageTemplates();
   const DEFAULT_ROUTE = "home";
   const IS_LEGACY_ROUTER =
@@ -55,6 +133,33 @@
         },
       ),
     );
+  }
+
+  function applyDataImageFallbacks(root = document) {
+    $$('img[data-image-fallback]', root).forEach((image) => {
+      const fallback = MOCK_IMAGE_FALLBACKS[image.dataset.imageFallback];
+      if (!fallback) return;
+      const dataSource = safeCourseDetailUrl(image.dataset.imageSrc);
+      const dataAlt = String(image.dataset.imageAlt || "").trim();
+      const existingAlt = String(image.getAttribute("alt") || "").trim();
+
+      if (dataSource) {
+        image.addEventListener(
+          "error",
+          () => {
+            image.src = fallback.src;
+            image.alt = fallback.alt;
+          },
+          { once: true },
+        );
+        image.src = dataSource;
+        image.alt = dataAlt || existingAlt || fallback.alt;
+        return;
+      }
+
+      image.src = fallback.src;
+      image.alt = fallback.alt;
+    });
   }
 
   function readStorage(storage, key) {
@@ -1849,23 +1954,37 @@
       : "";
   }
 
+  function courseMockFallback(course) {
+    const context = `${course.title || ""} ${course.categoryName || ""}`.toLocaleLowerCase(
+      "az",
+    );
+    if (/cloud|bulud|devops/.test(context))
+      return MOCK_IMAGE_FALLBACKS["course-cloud-devops"];
+    if (/cyber|kiber|security|təhlükəsizlik/.test(context))
+      return MOCK_IMAGE_FALLBACKS["course-cybersecurity"];
+    return MOCK_IMAGE_FALLBACKS["course-networking"];
+  }
+
   function renderCourseInstructor(instructor) {
     if (!instructor || typeof instructor !== "object") return "";
     const name = String(instructor.name || "").trim();
     if (!name) return "";
     const title = String(instructor.title || "").trim();
-    const imageUrl = safeCourseDetailUrl(instructor.imageUrl);
+    const fallbackIndex = (name.codePointAt(0) || 0) % 3;
+    const fallback =
+      MOCK_IMAGE_FALLBACKS[`instructor-${fallbackIndex + 1}`];
+    const realImageUrl = safeCourseDetailUrl(instructor.imageUrl);
+    const imageUrl = realImageUrl || fallback.src;
+    const imageAlt = realImageUrl
+      ? instructor.imageAlt || name
+      : fallback.alt;
     return `<section class="Nexora_courseDetailV2__contentSection">
       <div class="Nexora_courseDetailV2__sectionHeading">
         <p class="Nexora_eyebrow">Təlimçi</p>
         <h2>Müəllim haqqında</h2>
       </div>
       <div class="Nexora_courseDetailV2__instructor">
-        ${
-          imageUrl
-            ? `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(name)}" loading="lazy" />`
-            : ""
-        }
+        <img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(imageAlt)}" loading="lazy" />
         <div>
           <h3>${escapeHtml(name)}</h3>
           ${title ? `<p>${escapeHtml(title)}</p>` : ""}
@@ -1888,12 +2007,12 @@
       ? `${course.durationWeeks} həftə`
       : "";
     const difficulty = enumLabel(course.difficulty);
-    const imageUrl = safeCourseDetailUrl(
-      course.imageUrl,
-      "assets/image.png",
-    );
-    const imageAlt =
-      course.imageAlt || `${title} kursunun əsas vizualı`;
+    const courseFallback = courseMockFallback(course);
+    const realImageUrl = safeCourseDetailUrl(course.imageUrl);
+    const imageUrl = realImageUrl || courseFallback.src;
+    const imageAlt = realImageUrl
+      ? course.imageAlt || `${title} kursunun əsas vizualı`
+      : courseFallback.alt;
     const categoryName = options.categoryName || "Nexora Academy";
     const metaItems = [difficulty, deliveryFormat, duration].filter(Boolean);
     const courseId = String(course.id || "").trim();
@@ -2029,22 +2148,16 @@
       title: "Süni intellektin əsasları",
       description:
         "Süni intellekt anlayışları, məsuliyyətli istifadə və praktiki iş axınları üzrə möhkəm təməl yaradın.",
-      imageUrl: "assets/image.png",
-      imageAlt: "Süni intellektin əsasları kursunun vizualı",
     },
     "data-analytics": {
       title: "Tətbiqi məlumat analitikası",
       description:
         "Daha yaxşı qərarlar üçün məlumatları hazırlamağı, təhlil etməyi, vizuallaşdırmağı və təqdim etməyi öyrənin.",
-      imageUrl: "assets/image.png",
-      imageAlt: "Tətbiqi məlumat analitikası kursunun vizualı",
     },
     "cloud-engineering": {
       title: "Bulud mühəndisliyi",
       description:
         "Bulud arxitekturası, yerləşdirmə, əməliyyatlar və etibarlılıq üzrə praktiki bacarıqlar qazanın.",
-      imageUrl: "assets/image.png",
-      imageAlt: "Bulud mühəndisliyi kursunun vizualı",
     },
   });
 
@@ -3301,6 +3414,7 @@
   }
 
   function initPage(signal) {
+    applyDataImageFallbacks();
     initStandaloneTarget();
     initHeader(signal);
     initHeroMedia(signal);

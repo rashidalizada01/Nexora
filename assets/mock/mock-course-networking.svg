@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc">
+  <title id="title">Şəbəkə texnologiyaları kursu</title><desc id="desc">Router, server və bir-birinə bağlı şəbəkə qovşaqları</desc>
+  <defs><linearGradient id="g" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#3554d1"/><stop offset=".6" stop-color="#5ba7ff"/><stop offset="1" stop-color="#9ed8ff"/></linearGradient></defs>
+  <rect width="1200" height="900" fill="#141414"/><rect x="126" y="120" width="948" height="660" rx="48" fill="#1f1f1f" stroke="#262626" stroke-width="6"/>
+  <g stroke="#5ba7ff" stroke-width="6" opacity=".7"><path d="M310 300 600 450 890 290"/><path d="M310 600 600 450 890 620"/></g>
+  <g fill="#262626" stroke="url(#g)" stroke-width="7"><rect x="225" y="215" width="170" height="170" rx="28"/><rect x="805" y="205" width="170" height="170" rx="28"/><rect x="225" y="515" width="170" height="170" rx="28"/><rect x="805" y="535" width="170" height="170" rx="28"/><rect x="475" y="355" width="250" height="190" rx="38"/></g>
+  <g fill="#9ed8ff"><circle cx="310" cy="300" r="18"/><circle cx="890" cy="290" r="18"/><circle cx="310" cy="600" r="18"/><circle cx="890" cy="620" r="18"/></g>
+  <g fill="#5ba7ff"><rect x="525" y="405" width="150" height="24" rx="12"/><rect x="525" y="449" width="150" height="24" rx="12"/><circle cx="547" cy="507" r="10"/><circle cx="581" cy="507" r="10"/></g>
+</svg>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">Cloud platforması layihəsi</title><desc id="desc">Cloud qovşağına deploy edilən konteynerlər və xidmətlər</desc>
+  <defs><linearGradient id="g" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#3554d1"/><stop offset="1" stop-color="#9ed8ff"/></linearGradient></defs>
+  <rect width="1200" height="800" fill="#141414"/><path d="M350 350h500a110 110 0 0 0 4-220 180 180 0 0 0-335-40 134 134 0 0 0-169 260Z" fill="url(#g)"/>
+  <g stroke="#5ba7ff" stroke-width="7"><path d="M600 350v130M600 480H290M600 480h310"/></g>
+  <g fill="#1f1f1f" stroke="#7bbcff" stroke-width="6"><rect x="150" y="520" width="280" height="150" rx="30"/><rect x="460" y="520" width="280" height="150" rx="30"/><rect x="770" y="520" width="280" height="150" rx="30"/></g><g fill="#9ed8ff"><circle cx="210" cy="595" r="14"/><circle cx="520" cy="595" r="14"/><circle cx="830" cy="595" r="14"/></g>
+</svg>

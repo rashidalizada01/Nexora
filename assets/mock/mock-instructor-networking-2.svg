@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" role="img" aria-labelledby="title desc">
+  <title id="title">IT sertifikasiya müəllimi portreti</title><desc id="desc">Şəbəkə qovşaqları fonunda nümunəvi müəllim silueti</desc>
+  <defs><linearGradient id="g" x1="0" x2="1" y1="1" y2="0"><stop stop-color="#1b2f6b"/><stop offset=".55" stop-color="#5ba7ff"/><stop offset="1" stop-color="#b8dcff"/></linearGradient></defs>
+  <rect width="800" height="1000" fill="#141414"/><rect x="90" y="90" width="620" height="820" rx="80" fill="#1f1f1f" stroke="#262626" stroke-width="8"/>
+  <g fill="#406dde" opacity=".65"><circle cx="165" cy="190" r="20"/><circle cx="635" cy="245" r="20"/><circle cx="145" cy="710" r="20"/><circle cx="665" cy="690" r="20"/></g><g stroke="#406dde" stroke-width="5" opacity=".4"><path d="M165 190 325 310M635 245 490 320M145 710 300 585M665 690 505 580"/></g>
+  <circle cx="400" cy="365" r="138" fill="url(#g)"/><path d="M170 900c32-226 125-336 230-336s198 110 230 336" fill="url(#g)"/>
+  <path d="M318 386c22 38 142 38 164 0" fill="none" stroke="#141414" stroke-width="17" stroke-linecap="round"/>
+</svg>

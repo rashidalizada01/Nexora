@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-labelledby="title desc">
+  <title id="title">Şəbəkə qovşaqları</title><desc id="desc">Mavi qradientli əlaqə xətləri və qovşaqlardan ibarət dekorativ vizual</desc>
+  <defs><linearGradient id="g" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#3554d1"/><stop offset="1" stop-color="#9ed8ff"/></linearGradient></defs>
+  <rect width="600" height="600" fill="#141414"/><circle cx="300" cy="300" r="220" fill="#1f1f1f"/>
+  <g stroke="url(#g)" stroke-width="10" stroke-linecap="round"><path d="m130 205 170 95 170-115M130 395l170-95 170 115M300 90v210M300 300v210"/></g>
+  <g fill="url(#g)"><circle cx="130" cy="205" r="32"/><circle cx="470" cy="185" r="32"/><circle cx="130" cy="395" r="32"/><circle cx="470" cy="415" r="32"/><circle cx="300" cy="90" r="32"/><circle cx="300" cy="510" r="32"/><circle cx="300" cy="300" r="52"/></g>
+</svg>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">Kibertəhlükəsizlik layihəsi</title><desc id="desc">Təhlükəsizlik əməliyyat paneli, qalxan və monitorinq qrafikləri</desc>
+  <defs><linearGradient id="g" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#3554d1"/><stop offset="1" stop-color="#9ed8ff"/></linearGradient></defs>
+  <rect width="1200" height="800" fill="#141414"/><rect x="90" y="85" width="1020" height="630" rx="44" fill="#1f1f1f" stroke="#262626" stroke-width="7"/>
+  <rect x="155" y="150" width="570" height="500" rx="28" fill="#141414"/><path d="m205 490 100-95 90 50 105-175 145 115" fill="none" stroke="url(#g)" stroke-width="12" stroke-linecap="round"/><g fill="#9ed8ff"><circle cx="205" cy="490" r="15"/><circle cx="305" cy="395" r="15"/><circle cx="395" cy="445" r="15"/><circle cx="500" cy="270" r="15"/><circle cx="645" cy="385" r="15"/></g>
+  <path d="M900 160 1040 220v118c0 105-58 170-140 208-82-38-140-103-140-208V220l140-60Z" fill="url(#g)"/><rect x="846" y="305" width="108" height="95" rx="20" fill="#141414"/><path d="M865 305v-27a35 35 0 0 1 70 0v27" fill="none" stroke="#141414" stroke-width="20"/>
+</svg>
