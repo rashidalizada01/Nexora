@@ -1779,45 +1779,248 @@
     }
   }
 
-  function renderCourseDetails(course) {
+  function safeCourseDetailUrl(value, fallback = "") {
+    const raw = String(value || "").trim();
+    if (!raw) return fallback;
+    if (!/^[a-z][a-z0-9+.-]*:/i.test(raw) && !raw.startsWith("//"))
+      return raw;
+    try {
+      const parsed = new URL(raw, location.href);
+      return ["http:", "https:"].includes(parsed.protocol) ? raw : fallback;
+    } catch (_) {
+      return fallback;
+    }
+  }
+
+  function courseDetailTextList(value) {
+    return (Array.isArray(value) ? value : [])
+      .map((item) => String(item || "").trim())
+      .filter(Boolean);
+  }
+
+  function renderCourseModules(modules) {
+    const items = (Array.isArray(modules) ? modules : [])
+      .map((module, index) => {
+        const objectModule =
+          module && typeof module === "object" && !Array.isArray(module)
+            ? module
+            : null;
+        const title = String(
+          objectModule ? objectModule.title || "" : module || "",
+        ).trim();
+        const topics = courseDetailTextList(objectModule?.topics);
+        if (!title && !topics.length) return "";
+        return `<article class="Nexora_courseDetailV2__module">
+          <span class="Nexora_courseDetailV2__moduleIndex">${String(index + 1).padStart(2, "0")}</span>
+          <div>
+            ${title ? `<h3>${escapeHtml(title)}</h3>` : ""}
+            ${
+              topics.length
+                ? `<ul>${topics.map((topic) => `<li>${escapeHtml(topic)}</li>`).join("")}</ul>`
+                : ""
+            }
+          </div>
+        </article>`;
+      })
+      .filter(Boolean);
+    return items.length
+      ? `<section class="Nexora_courseDetailV2__contentSection">
+          <div class="Nexora_courseDetailV2__sectionHeading">
+            <p class="Nexora_eyebrow">Tədris planı</p>
+            <h2>Kurs proqramı</h2>
+          </div>
+          <div class="Nexora_courseDetailV2__modules">${items.join("")}</div>
+        </section>`
+      : "";
+  }
+
+  function renderCourseRequirements(requirements) {
+    const items = courseDetailTextList(requirements);
+    return items.length
+      ? `<section class="Nexora_courseDetailV2__contentSection">
+          <div class="Nexora_courseDetailV2__sectionHeading">
+            <p class="Nexora_eyebrow">Başlamazdan əvvəl</p>
+            <h2>Tələblər</h2>
+          </div>
+          <ul class="Nexora_courseDetailV2__checkList">
+            ${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+          </ul>
+        </section>`
+      : "";
+  }
+
+  function renderCourseInstructor(instructor) {
+    if (!instructor || typeof instructor !== "object") return "";
+    const name = String(instructor.name || "").trim();
+    if (!name) return "";
+    const title = String(instructor.title || "").trim();
+    const imageUrl = safeCourseDetailUrl(instructor.imageUrl);
+    return `<section class="Nexora_courseDetailV2__contentSection">
+      <div class="Nexora_courseDetailV2__sectionHeading">
+        <p class="Nexora_eyebrow">Təlimçi</p>
+        <h2>Müəllim haqqında</h2>
+      </div>
+      <div class="Nexora_courseDetailV2__instructor">
+        ${
+          imageUrl
+            ? `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(name)}" loading="lazy" />`
+            : ""
+        }
+        <div>
+          <h3>${escapeHtml(name)}</h3>
+          ${title ? `<p>${escapeHtml(title)}</p>` : ""}
+        </div>
+      </div>
+    </section>`;
+  }
+
+  function renderCourseDetails(course, options = {}) {
+    const title = course.title || "Kurs";
     const description =
       course.fullDescription ||
+      course.description ||
       course.shortDescription ||
       "Bu kurs haqqında ətraflı məlumat hazırlanır.";
+    const shortDescription =
+      course.shortDescription || course.description || course.fullDescription || "";
+    const deliveryFormat = enumLabel(course.deliveryFormat);
+    const duration = course.durationWeeks
+      ? `${course.durationWeeks} həftə`
+      : "";
+    const difficulty = enumLabel(course.difficulty);
+    const imageUrl = safeCourseDetailUrl(
+      course.imageUrl,
+      "assets/image.png",
+    );
+    const imageAlt =
+      course.imageAlt || `${title} kursunun əsas vizualı`;
+    const categoryName = options.categoryName || "Nexora Academy";
+    const metaItems = [difficulty, deliveryFormat, duration].filter(Boolean);
+    const courseId = String(course.id || "").trim();
+    const explicitRegistrationUrl = safeCourseDetailUrl(course.registrationUrl);
     const role = userRole();
-    const enrollmentTarget = `enrollments.html?courseId=${encodeURIComponent(course.id || "")}`;
-    const accountLink = accessToken
-      ? role === "STUDENT"
-        ? enrollmentTarget
-        : roleDestination(role)
-      : loginUrl(enrollmentTarget);
-    const accountLabel = accessToken
-      ? role === "STUDENT"
-        ? "Qeydiyyatlarım"
-        : "Panelə keç"
-      : "Daxil ol";
-    return `<div class="Nexora_detailLayout">
-      <div class="Nexora_detailMain">
-        <div class="Nexora_courseMeta">
-          <span>${escapeHtml(enumLabel(course.difficulty))}</span>
-          <span>${escapeHtml(enumLabel(course.deliveryFormat))}</span>
-          ${course.durationWeeks ? `<span>${escapeHtml(course.durationWeeks)} həftə</span>` : ""}
+    const enrollmentTarget = courseId
+      ? `enrollments.html?courseId=${encodeURIComponent(courseId)}`
+      : "";
+    const accountLink = explicitRegistrationUrl
+      ? explicitRegistrationUrl
+      : courseId
+        ? accessToken
+          ? role === "STUDENT"
+            ? enrollmentTarget
+            : roleDestination(role)
+          : loginUrl(enrollmentTarget)
+        : "index.html#/nav/elaqe";
+    const accountLabel = explicitRegistrationUrl
+      ? "Qeydiyyatdan keç"
+      : courseId
+        ? accessToken
+          ? role === "STUDENT"
+            ? "Qeydiyyatlarım"
+            : "Panelə keç"
+          : "Daxil ol və qeydiyyatdan keç"
+        : "Qeydiyyat barədə məlumat al";
+    const requirements = renderCourseRequirements(course.requirements);
+    const modules = renderCourseModules(course.modules);
+    const instructor = renderCourseInstructor(course.instructor);
+    const certificateText = String(course.certificateText || "").trim();
+    const relatedIds = Array.isArray(course.relatedCourseIds)
+      ? course.relatedCourseIds.filter(
+          (id) => id && String(id) !== String(course.id || ""),
+        )
+      : [];
+    const detailRows = [
+      ["Tədris formatı", deliveryFormat || "Məlumat dəqiqləşdirilir"],
+      ["Müddət", duration || "Məlumat dəqiqləşdirilir"],
+      ...(difficulty ? [["Səviyyə", difficulty]] : []),
+      ...(course.locationText ? [["Məkan", course.locationText]] : []),
+      ...(course.pricePeriod ? [["Ödəniş dövrü", course.pricePeriod]] : []),
+    ];
+
+    return `<div class="Nexora_courseDetailV2">
+      <section class="Nexora_courseDetailV2__hero">
+        <div class="Nexora_courseDetailV2__heroCopy">
+          <p class="Nexora_eyebrow">${escapeHtml(categoryName)}</p>
+          ${
+            metaItems.length
+              ? `<div class="Nexora_courseMeta">${metaItems.map((item) => `<span>${escapeHtml(item)}</span>`).join("")}</div>`
+              : ""
+          }
+          <h1 class="Nexora_pageTitle">${escapeHtml(title)}</h1>
+          ${shortDescription ? `<p class="Nexora_pageLead">${escapeHtml(shortDescription)}</p>` : ""}
         </div>
-        <h1 class="Nexora_pageTitle">${escapeHtml(course.title || "Kurs")}</h1>
-        ${course.shortDescription ? `<p class="Nexora_pageLead">${escapeHtml(course.shortDescription)}</p>` : ""}
-        <div class="Nexora_richText"><p>${escapeHtml(description)}</p></div>
-        ${course.targetAudience ? `<div class="Nexora_detailBlock"><h2>Kimlər üçün nəzərdə tutulub?</h2><p>${escapeHtml(course.targetAudience)}</p></div>` : ""}
+        <figure class="Nexora_courseDetailV2__visual">
+          <img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(imageAlt)}" />
+        </figure>
+      </section>
+
+      <div class="Nexora_courseDetailV2__contentLayout">
+        <div class="Nexora_courseDetailV2__contentMain">
+          <section class="Nexora_courseDetailV2__contentSection">
+            <div class="Nexora_courseDetailV2__sectionHeading">
+              <p class="Nexora_eyebrow">Ətraflı məlumat</p>
+              <h2>Kurs haqqında</h2>
+            </div>
+            <div class="Nexora_courseDetailV2__richText"><p>${escapeHtml(description)}</p></div>
+          </section>
+
+          ${
+            course.targetAudience
+              ? `<section class="Nexora_courseDetailV2__contentSection">
+                  <div class="Nexora_courseDetailV2__sectionHeading">
+                    <p class="Nexora_eyebrow">Uyğunluq</p>
+                    <h2>Kimlər üçün nəzərdə tutulub?</h2>
+                  </div>
+                  <p class="Nexora_courseDetailV2__bodyText">${escapeHtml(course.targetAudience)}</p>
+                </section>`
+              : ""
+          }
+          ${modules}
+          ${requirements}
+          ${
+            certificateText
+              ? `<section class="Nexora_courseDetailV2__contentSection">
+                  <div class="Nexora_courseDetailV2__sectionHeading">
+                    <p class="Nexora_eyebrow">Nəticə</p>
+                    <h2>Sertifikat</h2>
+                  </div>
+                  <p class="Nexora_courseDetailV2__bodyText">${escapeHtml(certificateText)}</p>
+                </section>`
+              : ""
+          }
+          ${instructor}
+        </div>
+
+        <aside class="Nexora_panel Nexora_courseAside Nexora_courseDetailV2__aside">
+          <div>
+            <p class="Nexora_eyebrow">Kursun qiyməti</p>
+            <strong class="Nexora_detailPrice">${escapeHtml(formatPrice(course.basePrice, course.currency))}</strong>
+          </div>
+          <dl class="Nexora_detailList">
+            ${detailRows
+              .map(
+                ([label, value]) =>
+                  `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`,
+              )
+              .join("")}
+          </dl>
+          <a class="ai-btn ai-btn--gradient Nexora_courseDetailV2__cta" href="${escapeHtml(accountLink)}">${escapeHtml(accountLabel)}</a>
+          <p class="Nexora_muted">Qrup tarixləri, mövcud yerlər və yekun qeydiyyat məlumatları təsdiqləndikdə təqdim ediləcək.</p>
+        </aside>
       </div>
-      <aside class="Nexora_panel Nexora_courseAside">
-        <p class="Nexora_eyebrow">Kurs məlumatı</p>
-        <strong class="Nexora_detailPrice">${escapeHtml(formatPrice(course.basePrice, course.currency))}</strong>
-        <dl class="Nexora_detailList">
-          ${course.locationText ? `<div><dt>Məkan</dt><dd>${escapeHtml(course.locationText)}</dd></div>` : ""}
-          ${course.pricePeriod ? `<div><dt>Ödəniş dövrü</dt><dd>${escapeHtml(course.pricePeriod)}</dd></div>` : ""}
-        </dl>
-        <a class="ai-btn ai-btn--gradient" href="${escapeHtml(accountLink)}">${accountLabel}</a>
-        <p class="Nexora_muted">Qrup tarixləri və boş yerlər elan olunduqda qeydiyyat üçün qrup ID-si təqdim ediləcək. Ödəniş bu səhifədə aparılmır.</p>
-      </aside>
+
+      ${
+        relatedIds.length
+          ? `<section class="Nexora_courseDetailV2__related">
+              <div class="Nexora_courseDetailV2__sectionHeading">
+                <p class="Nexora_eyebrow">Davam et</p>
+                <h2>Əlaqəli kurslar</h2>
+              </div>
+              <p class="Nexora_status" id="relatedCoursesStatus">Əlaqəli kurslar yüklənir…</p>
+              <div class="Nexora_courseGrid" id="relatedCourses"></div>
+            </section>`
+          : ""
+      }
     </div>`;
   }
 
@@ -1826,32 +2029,27 @@
       title: "Süni intellektin əsasları",
       description:
         "Süni intellekt anlayışları, məsuliyyətli istifadə və praktiki iş axınları üzrə möhkəm təməl yaradın.",
+      imageUrl: "assets/image.png",
+      imageAlt: "Süni intellektin əsasları kursunun vizualı",
     },
     "data-analytics": {
       title: "Tətbiqi məlumat analitikası",
       description:
         "Daha yaxşı qərarlar üçün məlumatları hazırlamağı, təhlil etməyi, vizuallaşdırmağı və təqdim etməyi öyrənin.",
+      imageUrl: "assets/image.png",
+      imageAlt: "Tətbiqi məlumat analitikası kursunun vizualı",
     },
     "cloud-engineering": {
       title: "Bulud mühəndisliyi",
       description:
         "Bulud arxitekturası, yerləşdirmə, əməliyyatlar və etibarlılıq üzrə praktiki bacarıqlar qazanın.",
+      imageUrl: "assets/image.png",
+      imageAlt: "Bulud mühəndisliyi kursunun vizualı",
     },
   });
 
   function renderFeaturedCourseDetails(course) {
-    return `<div class="Nexora_detailLayout">
-      <div class="Nexora_detailMain">
-        <p class="Nexora_eyebrow">Nexora Academy</p>
-        <h1 class="Nexora_pageTitle">${escapeHtml(course.title)}</h1>
-        <p class="Nexora_pageLead">${escapeHtml(course.description)}</p>
-      </div>
-      <aside class="Nexora_panel Nexora_courseAside">
-        <p class="Nexora_eyebrow">Kurs məlumatı</p>
-        <p class="Nexora_muted">Tədris formatı, müddəti və qəbul məlumatları dəqiqləşdirildikdə bu səhifədə göstəriləcək.</p>
-        <a class="ai-btn ai-btn--gradient" href="courses.html">Kurs kataloqu</a>
-      </aside>
-    </div>`;
+    return renderCourseDetails(course, { categoryName: "Nexora Academy" });
   }
 
   function initCourseDetailsPage(signal) {
@@ -1877,8 +2075,8 @@
     const reviewForm = $("#reviewForm");
     const reviewAccess = $("#reviewAccess");
     const loginLink = $("#reviewLoginLink");
-    const relatedContainer = $("#relatedCourses");
-    const relatedStatus = $("#relatedCoursesStatus");
+    let relatedContainer = null;
+    let relatedStatus = null;
 
     const courseId = params.get("id")?.trim() || "";
     if (!courseId) {
@@ -1914,7 +2112,13 @@
         const categoryState = publicCategoryState(categories);
         if (!isPublicCourse(course, categoryState.visibleIds))
           throw new ApiError(404, "Kurs hazırda əlçatan deyil.");
-        container.innerHTML = renderCourseDetails(course || {});
+        const category = categoryState.byId.get(String(course.categoryId));
+        container.innerHTML = renderCourseDetails(course || {}, {
+          categoryName:
+            category?.name || category?.slug || "Nexora Academy",
+        });
+        relatedContainer = $("#relatedCourses", container);
+        relatedStatus = $("#relatedCoursesStatus", container);
         if (course?.title) document.title = `${course.title} | Nexora Academy`;
         const relatedIds = [
           ...new Set(
