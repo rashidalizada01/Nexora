@@ -647,8 +647,8 @@
 
   function initHeroMedia(signal) {
     const video = $(".HeroSection_video__GVdk5");
-    const playButton = $('button[aria-label="play / pause"]');
-    const muteButton = $('button[aria-label="mute / unmute"]');
+    const playButton = $('[data-hero-control="playback"]');
+    const muteButton = $('[data-hero-control="sound"]');
     const hasSource = Boolean(
       video?.querySelector("source[src]") || video?.getAttribute("src"),
     );
@@ -657,12 +657,47 @@
       muteButton?.setAttribute("aria-disabled", "true");
       return;
     }
+    const icons = {
+      play: '<path d="M8 5.75v12.5L18 12 8 5.75Z"></path>',
+      pause:
+        '<path d="M8 5V19M16 5V19" style="fill:none" stroke="var(--neutral-1)" stroke-linecap="round" stroke-width="2"></path>',
+      muted:
+        '<path d="M4 9h3l4-4v14l-4-4H4V9Z"></path><path d="m15 9 5 6m0-6-5 6" style="fill:none" stroke="var(--neutral-1)" stroke-linecap="round" stroke-width="2"></path>',
+      sound:
+        '<path d="M4 9h3l4-4v14l-4-4H4V9Z"></path><path d="M14.5 8.5C16.4 10.4 16.4 13.6 14.5 15.5M17 6C20.3 9.3 20.3 14.7 17 18" style="fill:none" stroke="var(--neutral-1)" stroke-linecap="round" stroke-width="1.8"></path>',
+    };
+    const setButtonIcon = (button, icon) => {
+      const svg = $("svg", button);
+      if (!svg) return;
+      svg.setAttribute("viewBox", "0 0 24 24");
+      svg.setAttribute("aria-hidden", "true");
+      svg.setAttribute("focusable", "false");
+      svg.innerHTML = icons[icon];
+    };
+    const syncPlaybackControl = () => {
+      if (!playButton) return;
+      const isPaused = video.paused || video.ended;
+      playButton.dataset.mediaState = isPaused ? "paused" : "playing";
+      playButton.setAttribute(
+        "aria-label",
+        isPaused ? "Videonu oynat" : "Videonu dayandır",
+      );
+      setButtonIcon(playButton, isPaused ? "play" : "pause");
+    };
+    const syncSoundControl = () => {
+      if (!muteButton) return;
+      const isMuted = video.muted || video.volume === 0;
+      muteButton.dataset.mediaState = isMuted ? "muted" : "unmuted";
+      muteButton.setAttribute("aria-label", isMuted ? "Səsi aç" : "Səsi bağla");
+      setButtonIcon(muteButton, isMuted ? "muted" : "sound");
+    };
     playButton?.addEventListener(
       "click",
       async () => {
         try {
           if (video.paused) await video.play();
           else video.pause();
+          syncPlaybackControl();
         } catch (_) {
           playButton.setAttribute("aria-disabled", "true");
         }
@@ -673,9 +708,24 @@
       "click",
       () => {
         video.muted = !video.muted;
+        syncSoundControl();
       },
       { signal },
     );
+    ["play", "pause", "ended"].forEach((eventName) =>
+      video.addEventListener(eventName, syncPlaybackControl, { signal }),
+    );
+    video.addEventListener("volumechange", syncSoundControl, { signal });
+    video.addEventListener(
+      "loadedmetadata",
+      () => {
+        syncPlaybackControl();
+        syncSoundControl();
+      },
+      { signal },
+    );
+    syncPlaybackControl();
+    syncSoundControl();
   }
 
   function initHeroTypewriter(signal) {

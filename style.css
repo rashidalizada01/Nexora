@@ -4735,7 +4735,24 @@ input:-webkit-autofill:hover {
   height: 42px;
   border-radius: 50%;
   background: hsla(0, 0%, 100%, .28);
-  cursor: pointer
+  color: var(--neutral-1);
+  cursor: pointer;
+  transition: background-color 250ms ease, transform 100ms ease
+}
+
+@media(hover:hover) {
+  .HeroSection_controlsItem__LHLpm:hover {
+    background: hsla(0, 0%, 100%, .42)
+  }
+}
+
+.HeroSection_controlsItem__LHLpm:active {
+  transform: scale(.94)
+}
+
+.HeroSection_controlsItem__LHLpm:focus-visible {
+  outline: 2px solid var(--neutral-1);
+  outline-offset: 2px
 }
 
 .HeroSection_controlsItem__LHLpm img,
