@@ -981,6 +981,7 @@
         slide.classList.contains("swiper-slide-active"),
       ),
     );
+    let currentOffset = 0;
     const render = (animate = true) => {
       if (centerFromLayout) {
         slides.forEach((slide, index) => {
@@ -1005,6 +1006,7 @@
         : containerWidth / 2 -
           slideWidth / 2 -
           active * (slideWidth + margin);
+      currentOffset = offset;
       wrapper.style.transition = animate ? "transform 480ms ease" : "none";
       wrapper.style.transform = `translate3d(${offset}px, 0, 0)`;
       slides.forEach((slide, index) => {
@@ -1032,14 +1034,21 @@
       render(true);
     };
     let autoplayTimer = null;
+    let dragState = null;
+    const stopAutoplay = () => {
+      if (autoplayTimer === null) return;
+      window.clearInterval(autoplayTimer);
+      autoplayTimer = null;
+    };
     const restartAutoplay = () => {
-      if (autoplayTimer !== null) window.clearInterval(autoplayTimer);
+      stopAutoplay();
       autoplayTimer =
         autoplayMs > 0 && slides.length > 1
           ? window.setInterval(() => move(1), autoplayMs)
           : null;
     };
     const manualMove = (delta) => {
+      dragState = null;
       move(delta);
       restartAutoplay();
     };
@@ -1049,30 +1058,158 @@
     $(nextSelector)?.addEventListener("click", () => manualMove(1), {
       signal,
     });
-    let startX = null;
+
+    const getRenderedOffset = () => {
+      const transform = window.getComputedStyle(wrapper).transform;
+      if (!transform || transform === "none") return currentOffset;
+      const matrix3d = transform.match(/^matrix3d\((.+)\)$/);
+      if (matrix3d) {
+        const values = matrix3d[1].split(",").map(Number);
+        return Number.isFinite(values[12]) ? values[12] : currentOffset;
+      }
+      const matrix = transform.match(/^matrix\((.+)\)$/);
+      if (matrix) {
+        const values = matrix[1].split(",").map(Number);
+        return Number.isFinite(values[4]) ? values[4] : currentOffset;
+      }
+      return currentOffset;
+    };
+    const getDragThreshold = () => {
+      const activeSlide = slides[active];
+      const slideWidth = activeSlide?.getBoundingClientRect().width || 315;
+      return Math.min(80, Math.max(45, slideWidth * 0.12));
+    };
+    const startDrag = (clientX, clientY, inputType) => {
+      stopAutoplay();
+      const baseOffset = getRenderedOffset();
+      dragState = {
+        inputType,
+        startX: clientX,
+        startY: clientY,
+        lastX: clientX,
+        axis: inputType === "mouse" ? "horizontal" : null,
+        baseOffset,
+      };
+      wrapper.style.transition = "none";
+      wrapper.style.transform = `translate3d(${baseOffset}px, 0, 0)`;
+    };
+    const updateDrag = (clientX, clientY, event) => {
+      if (!dragState) return;
+      const deltaX = clientX - dragState.startX;
+      const deltaY = clientY - dragState.startY;
+      if (dragState.axis === null && Math.hypot(deltaX, deltaY) >= 6) {
+        dragState.axis =
+          Math.abs(deltaX) >= Math.abs(deltaY) ? "horizontal" : "vertical";
+      }
+      dragState.lastX = clientX;
+      if (dragState.axis !== "horizontal") return;
+      event.preventDefault();
+      wrapper.style.transform = `translate3d(${dragState.baseOffset + deltaX}px, 0, 0)`;
+    };
+    const finishDrag = (clientX, allowSnap = true) => {
+      if (!dragState) return;
+      const completedDrag = dragState;
+      const endX = Number.isFinite(clientX) ? clientX : completedDrag.lastX;
+      const deltaX = endX - completedDrag.startX;
+      dragState = null;
+      if (
+        allowSnap &&
+        completedDrag.axis === "horizontal" &&
+        Math.abs(deltaX) >= getDragThreshold()
+      ) {
+        move(deltaX > 0 ? -1 : 1);
+      } else {
+        render(true);
+      }
+      restartAutoplay();
+    };
+
     container.addEventListener(
-      "pointerdown",
+      "mousedown",
       (event) => {
-        startX = event.clientX;
-        container.setPointerCapture?.(event.pointerId);
+        if (event.button !== 0) return;
+        event.preventDefault();
+        startDrag(event.clientX, event.clientY, "mouse");
+      },
+      { signal },
+    );
+    window.addEventListener(
+      "mousemove",
+      (event) => {
+        if (dragState?.inputType !== "mouse") return;
+        updateDrag(event.clientX, event.clientY, event);
+      },
+      { signal },
+    );
+    window.addEventListener(
+      "mouseup",
+      (event) => {
+        if (dragState?.inputType !== "mouse") return;
+        finishDrag(event.clientX);
       },
       { signal },
     );
     container.addEventListener(
-      "pointerup",
+      "dragstart",
+      (event) => event.preventDefault(),
+      { signal },
+    );
+    container.addEventListener(
+      "touchstart",
       (event) => {
-        if (startX === null) return;
-        const delta = event.clientX - startX;
-        if (Math.abs(delta) > 45) manualMove(delta > 0 ? -1 : 1);
-        startX = null;
+        if (event.touches.length !== 1) return;
+        const touch = event.touches[0];
+        startDrag(touch.clientX, touch.clientY, "touch");
+      },
+      { signal, passive: true },
+    );
+    container.addEventListener(
+      "touchmove",
+      (event) => {
+        if (dragState?.inputType !== "touch" || event.touches.length !== 1)
+          return;
+        const touch = event.touches[0];
+        updateDrag(touch.clientX, touch.clientY, event);
+      },
+      { signal, passive: false },
+    );
+    container.addEventListener(
+      "touchend",
+      (event) => {
+        if (dragState?.inputType !== "touch") return;
+        finishDrag(event.changedTouches[0]?.clientX);
+      },
+      { signal, passive: true },
+    );
+    container.addEventListener(
+      "touchcancel",
+      () => {
+        if (dragState?.inputType !== "touch") return;
+        finishDrag(dragState.lastX, false);
+      },
+      { signal, passive: true },
+    );
+    window.addEventListener(
+      "blur",
+      () => {
+        if (dragState?.inputType !== "mouse") return;
+        finishDrag(dragState.lastX, false);
       },
       { signal },
     );
-    window.addEventListener("resize", () => render(false), { signal });
+    window.addEventListener(
+      "resize",
+      () => {
+        dragState = null;
+        render(false);
+        restartAutoplay();
+      },
+      { signal },
+    );
     signal?.addEventListener(
       "abort",
       () => {
-        if (autoplayTimer !== null) window.clearInterval(autoplayTimer);
+        stopAutoplay();
       },
       { once: true },
     );
@@ -1090,6 +1227,8 @@
         nextSelector:
           ".SuccessStories_section__header__controller__next__A3AXv",
         depth: 290,
+        centerFromLayout: true,
+        autoplayMs: SCHOLARSHIPS_SLIDER_AUTOPLAY_MS,
       },
       signal,
     );
@@ -1472,57 +1611,6 @@
       </div>
       <a class="ai-btn ai-btn--text" href="category.html?id=${encodeURIComponent(category.id)}">Kateqoriyaya bax</a>
     </article>`;
-  }
-
-  async function initHomePage(signal) {
-    const coursesContainer = $("#homeCourses");
-    const categoriesContainer = $("#homeCategories");
-    const status = $("#homeCoursesStatus");
-    if (!coursesContainer || !categoriesContainer || !status) return;
-    try {
-      const categories = await apiFetch("/api/v1/categories", { signal });
-      const categoryState = publicCategoryState(categories);
-      const params = new URLSearchParams({
-        page: "0",
-        size: "6",
-        sort: "title,asc",
-        published: "true",
-        active: "true",
-      });
-      const page = await apiFetch(`/api/v1/courses?${params}`, { signal });
-      if (signal.aborted) return;
-      const categoryNames = new Map(
-        categoryState.visible.map((category) => [
-          String(category.id),
-          category.name || category.slug || String(category.id),
-        ]),
-      );
-      const courses = (Array.isArray(page?.content) ? page.content : [])
-        .filter((course) =>
-          isPublicCourse(course, categoryState.visibleIds),
-        )
-        .slice(0, 3);
-      coursesContainer.innerHTML = courses.length
-        ? courses
-            .map((course) => renderCourseCard(course, categoryNames))
-            .join("")
-        : '<div class="Nexora_emptyState"><h3>Açıq kurs tapılmadı</h3><p>Kataloqu bir az sonra yenidən yoxlayın.</p></div>';
-      categoriesContainer.innerHTML = categoryState.visible
-        .slice(0, 3)
-        .map((category) => renderCategoryCard(category, categoryState))
-        .join("");
-      status.textContent = courses.length
-        ? `${courses.length} açıq kurs göstərilir`
-        : "Açıq kurs tapılmadı";
-      status.dataset.state = "success";
-    } catch (error) {
-      if (error?.name === "AbortError") return;
-      coursesContainer.innerHTML =
-        '<div class="Nexora_emptyState"><h3>Kurslar əlçatan deyil</h3><p>Məlumatları hazırda yükləmək mümkün olmadı.</p></div>';
-      categoriesContainer.innerHTML = "";
-      status.textContent = apiErrorMessage(error);
-      status.dataset.state = "error";
-    }
   }
 
   async function initCategoriesPage(signal) {
@@ -2882,9 +2970,6 @@
 
   function initApiPage(signal) {
     switch (document.body.dataset.page) {
-      case "home":
-        void initHomePage(signal);
-        break;
       case "courses":
         initCoursesPage(signal);
         break;
