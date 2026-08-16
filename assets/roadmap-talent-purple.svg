@@ -1,0 +1,21 @@
+<svg width="180" height="160" viewBox="0 0 180 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="person" x1="70" y1="20" x2="126" y2="130" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1C65FF"/>
+      <stop offset="1" stop-color="#0848F4"/>
+    </linearGradient>
+    <linearGradient id="plusBg" x1="20" y1="72" x2="91" y2="150" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#315AAE"/>
+      <stop offset="1" stop-color="#162B62"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="10" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <circle cx="105" cy="40" r="23" fill="url(#person)"/>
+  <path d="M60 111C60 82.8 78.8 64 105 64C131.2 64 150 82.8 150 111V121C150 128.2 144.2 134 137 134H73C65.8 134 60 128.2 60 121V111Z" fill="url(#person)"/>
+  <circle cx="58" cy="113" r="46" fill="url(#plusBg)" filter="url(#glow)"/>
+  <circle cx="58" cy="113" r="45" stroke="#5E78CB" stroke-opacity=".55"/>
+  <path d="M58 94V132M39 113H77" stroke="white" stroke-width="5" stroke-linecap="round"/>
+</svg>

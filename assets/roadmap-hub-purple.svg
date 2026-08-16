@@ -1,0 +1,22 @@
+<svg width="170" height="160" viewBox="0 0 170 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="tile" x1="20" y1="20" x2="145" y2="140" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#57426F"/>
+      <stop offset="1" stop-color="#27305F"/>
+    </linearGradient>
+    <radialGradient id="core" cx="0" cy="0" r="1" gradientTransform="translate(85 80) rotate(90) scale(53)">
+      <stop stop-color="#116BFF" stop-opacity="1"/>
+      <stop offset=".35" stop-color="#0B55F9" stop-opacity=".9"/>
+      <stop offset="1" stop-color="#16366F" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="coreGlow" x="-70%" y="-70%" width="240%" height="240%">
+      <feGaussianBlur stdDeviation="13"/>
+    </filter>
+  </defs>
+  <rect x="18" y="15" width="62" height="62" rx="12" fill="url(#tile)" stroke="#69628C"/>
+  <rect x="90" y="15" width="62" height="62" rx="12" fill="url(#tile)" stroke="#69628C"/>
+  <rect x="18" y="87" width="62" height="62" rx="12" fill="url(#tile)" stroke="#69628C"/>
+  <rect x="90" y="87" width="62" height="62" rx="12" fill="url(#tile)" stroke="#69628C"/>
+  <circle cx="85" cy="80" r="48" fill="#0762FF" fill-opacity=".72" filter="url(#coreGlow)"/>
+  <circle cx="85" cy="80" r="28" fill="url(#core)"/>
+</svg>

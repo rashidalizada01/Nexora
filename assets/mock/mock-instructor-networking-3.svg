@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" role="img" aria-labelledby="title desc">
+  <title id="title">Cloud müəllimi portreti</title><desc id="desc">Cloud və server elementləri fonunda nümunəvi müəllim silueti</desc>
+  <defs><linearGradient id="g" x1="0" x2="1" y1="1" y2="0"><stop stop-color="#3554d1"/><stop offset=".5" stop-color="#7bbcff"/><stop offset="1" stop-color="#eef7ff"/></linearGradient></defs>
+  <rect width="800" height="1000" fill="#141414"/><circle cx="400" cy="440" r="345" fill="#1f1f1f"/>
+  <path d="M105 210h165a42 42 0 0 0 1-84 67 67 0 0 0-124-15 50 50 0 0 0-42 99ZM535 270h160a40 40 0 0 0 1-80 65 65 0 0 0-120-14 48 48 0 0 0-41 94Z" fill="#406dde" opacity=".55"/>
+  <circle cx="400" cy="390" r="140" fill="url(#g)"/><path d="M165 925c28-235 126-350 235-350s207 115 235 350" fill="url(#g)"/>
+  <g fill="#5ba7ff"><rect x="115" y="660" width="125" height="28" rx="10"/><rect x="560" y="675" width="125" height="28" rx="10"/></g>
+</svg>

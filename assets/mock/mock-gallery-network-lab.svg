@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1200" role="img" aria-labelledby="title desc">
+  <title id="title">Şəbəkə laboratoriyası</title><desc id="desc">Server rəfləri və aktiv şəbəkə əlaqələri olan nümunəvi laboratoriya</desc>
+  <defs><linearGradient id="g" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#3554d1"/><stop offset="1" stop-color="#9ed8ff"/></linearGradient></defs>
+  <rect width="900" height="1200" fill="#141414"/><circle cx="680" cy="230" r="360" fill="#1b2f6b" opacity=".3"/>
+  <g fill="#1f1f1f" stroke="#434343" stroke-width="8"><rect x="95" y="150" width="290" height="880" rx="36"/><rect x="515" y="150" width="290" height="880" rx="36"/></g>
+  <g fill="#262626" stroke="#5ba7ff" stroke-width="4"><rect x="135" y="215" width="210" height="115" rx="18"/><rect x="135" y="375" width="210" height="115" rx="18"/><rect x="135" y="535" width="210" height="115" rx="18"/><rect x="135" y="695" width="210" height="115" rx="18"/><rect x="555" y="215" width="210" height="115" rx="18"/><rect x="555" y="375" width="210" height="115" rx="18"/><rect x="555" y="535" width="210" height="115" rx="18"/><rect x="555" y="695" width="210" height="115" rx="18"/></g>
+  <path d="M345 272c160 0 50 320 210 320M345 752c160 0 50-320 210-320" fill="none" stroke="url(#g)" stroke-width="12" stroke-linecap="round"/>
+  <g fill="#9ed8ff"><circle cx="170" cy="272" r="12"/><circle cx="590" cy="272" r="12"/><circle cx="170" cy="432" r="12"/><circle cx="590" cy="432" r="12"/><circle cx="170" cy="592" r="12"/><circle cx="590" cy="592" r="12"/></g>
+</svg>

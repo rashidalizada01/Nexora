@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc">
+  <title id="title">Cloud və DevOps kursu</title><desc id="desc">Cloud platforması, deploy mərhələləri və server konteynerləri</desc>
+  <defs><linearGradient id="g" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#3554d1"/><stop offset=".6" stop-color="#5ba7ff"/><stop offset="1" stop-color="#9ed8ff"/></linearGradient></defs>
+  <rect width="1200" height="900" fill="#141414"/><rect x="110" y="110" width="980" height="680" rx="52" fill="#1f1f1f" stroke="#262626" stroke-width="6"/>
+  <path d="M390 405h410a105 105 0 0 0 4-210 170 170 0 0 0-315-38 126 126 0 0 0-99 248Z" fill="url(#g)"/>
+  <g stroke="#5ba7ff" stroke-width="7" fill="none"><path d="M330 570h540"/><path d="M390 520v100M600 520v100M810 520v100"/></g>
+  <g fill="#262626" stroke="#7bbcff" stroke-width="5"><rect x="260" y="620" width="260" height="105" rx="24"/><rect x="470" y="620" width="260" height="105" rx="24"/><rect x="680" y="620" width="260" height="105" rx="24"/></g>
+  <g fill="#9ed8ff"><circle cx="315" cy="672" r="12"/><circle cx="525" cy="672" r="12"/><circle cx="735" cy="672" r="12"/></g>
+</svg>

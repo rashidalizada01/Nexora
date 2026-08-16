@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">Şəbəkə avtomatlaşdırması layihəsi</title><desc id="desc">Şəbəkə cihazları və avtomatlaşdırma axını paneli</desc>
+  <defs><linearGradient id="g" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#3554d1"/><stop offset="1" stop-color="#9ed8ff"/></linearGradient></defs>
+  <rect width="1200" height="800" fill="#141414"/><rect x="105" y="90" width="990" height="620" rx="44" fill="#1f1f1f" stroke="#262626" stroke-width="7"/>
+  <g fill="#141414" stroke="#434343" stroke-width="5"><rect x="165" y="160" width="300" height="470" rx="28"/><rect x="520" y="160" width="515" height="220" rx="28"/><rect x="520" y="420" width="515" height="210" rx="28"/></g>
+  <g stroke="#5ba7ff" stroke-width="6"><path d="M235 260 390 345 235 445 390 535"/><path d="M610 275h330M610 525h330"/></g><g fill="url(#g)"><circle cx="235" cy="260" r="23"/><circle cx="390" cy="345" r="23"/><circle cx="235" cy="445" r="23"/><circle cx="390" cy="535" r="23"/></g>
+</svg>
